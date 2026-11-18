@@ -1,0 +1,8 @@
+index=botsv3 sourcetype=aws:s3:accesslogs "REST.PUT.OBJECT"
+| rex field=_raw "^\S+\s+(?<bucket>\S+)\s+\["
+| rex field=_raw "\]\s+(?<remote_ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s"
+| rex field=_raw "REST\.PUT\.OBJECT\s+(?<s3_key>\S+)"
+| where NOT cidrmatch("10.0.0.0/8", remote_ip)
+    AND NOT cidrmatch("172.16.0.0/12", remote_ip)
+    AND NOT cidrmatch("192.168.0.0/16", remote_ip)
+| table _time, remote_ip, bucket, s3_key
